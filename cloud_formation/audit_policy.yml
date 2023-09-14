@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS CloudFormation StackSet for Creating Audit Role.
+
+Parameters:
+  SecurityAuditRole:
+    Type: String
+    Description: Security Audit role to be trusted to assume the role created in the child account.
+
+
+Resources:
+  AuditRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: SecurityAudit
+      MaxSessionDuration: 43200
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref SecurityAuditRole
+            Action: 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+        - arn:aws:iam::aws:policy/AWSWAFReadOnlyAccess
+
+  AuditPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: AuditPolicy
+      Roles:
+        - !Ref AuditRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AuditApiPolicy
+            Effect: Allow
+            Action:
+              - "apigateway:GET"
+            Resource:
+              - arn:aws:apigateway:*::/domainnames/*/basepathmappings/*
+              - arn:aws:apigateway:*::/domainnames/*/basepathmappings
+Outputs:
+  AuditRole:
+    Value: !GetAtt AuditRole.Arn
+

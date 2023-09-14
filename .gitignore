@@ -1,0 +1,13 @@
+.idea/*
+
+venv/
+.venv/
+*.log
+.idea/*
+*.json
+*.csv
+
+__pycache__/
+*.py[cod]
+*$py.class
+
